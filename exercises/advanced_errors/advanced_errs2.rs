@@ -16,7 +16,7 @@
 // 4. Complete the partial implementation of `Display` for
 //    `ParseClimateError`.
 
-// I AM NOT DONE
+// 
 
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
@@ -47,6 +47,7 @@ impl From<ParseIntError> for ParseClimateError {
 impl From<ParseFloatError> for ParseClimateError {
     fn from(e: ParseFloatError) -> Self {
         // TODO: Complete this function
+        Self::ParseFloat(e)
     }
 }
 
@@ -55,6 +56,9 @@ impl From<ParseFloatError> for ParseClimateError {
 
 // The `Display` trait allows for other code to obtain the error formatted
 // as a user-visible string.
+
+impl Error for ParseClimateError{}
+
 impl Display for ParseClimateError {
     // TODO: Complete this function so that it produces the correct strings
     // for each error variant.
@@ -62,8 +66,11 @@ impl Display for ParseClimateError {
         // Imports the variants to make the following code more compact.
         use ParseClimateError::*;
         match self {
+            Empty => write!(f, "empty input"),
+            BadLen => write!(f, "incorrect number of fields"),
             NoCity => write!(f, "no city name"),
             ParseFloat(e) => write!(f, "error parsing temperature: {}", e),
+            ParseInt(e) => write!(f, "error parsing year: {}", e),
         }
     }
 }
@@ -88,9 +95,18 @@ impl FromStr for Climate {
     // TODO: Complete this function by making it handle the missing error
     // cases.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() == 0 {
+            return Err(ParseClimateError::Empty);
+        }
         let v: Vec<_> = s.split(',').collect();
         let (city, year, temp) = match &v[..] {
-            [city, year, temp] => (city.to_string(), year, temp),
+            [city, year, temp] => {
+                if city.len() == 0 {
+                    return Err(ParseClimateError::NoCity);
+                } else {
+                    (city.to_string(), year, temp)
+                }
+            },
             _ => return Err(ParseClimateError::BadLen),
         };
         let year: u32 = year.parse()?;
