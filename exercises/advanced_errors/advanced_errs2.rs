@@ -16,7 +16,7 @@
 // 4. Complete the partial implementation of `Display` for
 //    `ParseClimateError`.
 
-// 
+// 1
 
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
